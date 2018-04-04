@@ -1,0 +1,24 @@
+Manager:
+    StartScreen:
+    FileScreen:
+
+<StartScreen>:
+    name: 'start'
+    Label:
+        text: 'Welcome to GenomeSearch 1.0\nLoad genomes from a file or search on PATRIC'
+    Button:
+        text: "load from file"
+        on_press: root.manager.current = 'file'
+        pos_hint: {'x': 0.2, 'y': 0}
+        size_hint: 0.2,0.2
+    Button:
+        text: 'load from PATRIC'
+        on_press: root.manager.current = 'patric'
+        pos_hint: {'x': 0.6, 'y': 0}
+        size_hint: 0.2,0.2
+
+<FileScreen>:
+    name: 'file'
+    FileChooserListView:
+        size_hint: 0.5,0.5
+        on_submit: root.load(self.selection[0])
