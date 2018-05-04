@@ -11,13 +11,7 @@ def search_genomes():
         selection = input('1. search by name\n2. search by taxon ID')
         if selection == '1':
             query = input('Enter organism name: ')
-            # look up organism in PATRIC genome database
-            output = subprocess.run('p3-all-genomes --eq organism_name,%s --attr organism_name' % query, stdout=subprocess.PIPE, shell=True)
-            results = csv.DictReader(output.stdout.decode().split('\n'), delimiter='\t')
-            results = list(results)
-            if not results: # if no results were found
-                print('No results')
-                continue
+            results = search_by_name(query)
             # if there are search results
             for index, data in enumerate(results):
                 print('%s. %s' % (str(index),data['genome.organism_name']))
@@ -34,6 +28,16 @@ def search_genomes():
         genome_list.append(genome)
         proceed = (input('select another genome? (y/n) ').lower() != 'y')
     return genome_list
+
+# search PATRIC by organism name
+def search_by_name(organism_name):
+    output = subprocess.check_output('p3-all-genomes --eq organism_name,%s --attr organism_name' % organism_name, shell=True)
+    results = csv.DictReader(output.decode().split('\n'), delimiter='\t')
+    results = list(results)
+    if not results: # if no results were found
+        print('No results')
+    return results
+
 
 # scans using HMMs
 def scan_genome(genome_name):

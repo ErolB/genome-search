@@ -9,6 +9,8 @@ from modules import utils
 from modules import file_tools
 from modules import search_tools
 
+import subprocess
+
 hmm_path = '/home/erol/hmm_files/PreQ0_HMM'
 genome_file = '/home/erol/hmm_files/DataBases_Simonetta/Archaea300.rw.faa'
 pssm_path = '/home/erol/Projects/hmm_tool/cdd'

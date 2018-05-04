@@ -1,6 +1,13 @@
+# import kivy.uix.label.Label
+# import kivy.uix.checkbox.CheckBox
+# import ListAdapter kivy.adapters.listadapter.ListAdapter
+# import kivy.uix.listview.ListItemButton
+
 Manager:
     StartScreen:
     FileScreen:
+    SelectGenomesScreen:
+    PatricScreen:
 
 <StartScreen>:
     name: 'start'
@@ -9,16 +16,42 @@ Manager:
     Button:
         text: "load from file"
         on_press: root.manager.current = 'file'
-        pos_hint: {'x': 0.2, 'y': 0}
+        pos_hint: {'x': 0.2, 'y': 0.1}
         size_hint: 0.2,0.2
     Button:
         text: 'load from PATRIC'
         on_press: root.manager.current = 'patric'
-        pos_hint: {'x': 0.6, 'y': 0}
+        pos_hint: {'x': 0.6, 'y': 0.1}
         size_hint: 0.2,0.2
 
 <FileScreen>:
     name: 'file'
     FileChooserListView:
         size_hint: 0.5,0.5
-        on_submit: root.load(self.selection[0])
+        on_submit:
+            root.manager.candidate_genomes = root.load(selection)
+            root.manager.current = 'select_genome'
+
+<PatricScreen>:
+    name: 'patric'
+    species: species_input
+    TextInput:
+        id: species_input
+        size_hint: 0.5, 0.2
+        pos_hint: {'x': 0.25, 'y': 0.5}
+    Button:
+        text: 'Search by species'
+        on_press:
+            root.manager.candidate_genomes = root.name_search(species_input)
+            root.manager.current = 'select_genome'
+        pos_hint: {'x': 0.2, 'y': 0.1}
+        size_hint: 0.2, 0.2
+    Button:
+        text: 'Search by taxon ID'
+        size_hint: 0.2, 0.2
+        pos_hint: {'x': 0.6, 'y': 0.1}
+
+<SelectGenomesScreen>:
+    name: 'select_genome'
+    Label:
+        text: "selection"
