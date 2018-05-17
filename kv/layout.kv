@@ -1,7 +1,6 @@
-# import kivy.uix.label.Label
-# import kivy.uix.checkbox.CheckBox
-# import ListAdapter kivy.adapters.listadapter.ListAdapter
-# import kivy.uix.listview.ListItemButton
+#:import Label kivy.uix.label.Label
+#:import ListAdapter kivy.adapters.listadapter.ListAdapter
+#:import ListItemButton kivy.uix.listview.ListItemButton
 
 Manager:
     StartScreen:
@@ -26,15 +25,17 @@ Manager:
 
 <FileScreen>:
     name: 'file'
-    FileChooserListView:
-        size_hint: 0.5,0.5
+    FileChooserIconView:
+        id: filechooser
+        size_hint: 0.8,0.8
+        pos_hint: {'x':0, 'y':0.2}
         on_submit:
-            root.manager.candidate_genomes = root.load(selection)
+            root.manager.candidate_genomes = root.load(filechooser.selection[0])
             root.manager.current = 'select_genome'
 
 <PatricScreen>:
     name: 'patric'
-    species: species_input
+    species_input: root.species
     TextInput:
         id: species_input
         size_hint: 0.5, 0.2
@@ -43,6 +44,7 @@ Manager:
         text: 'Search by species'
         on_press:
             root.manager.candidate_genomes = root.name_search(species_input)
+            print root.manager.candidate_genomes
             root.manager.current = 'select_genome'
         pos_hint: {'x': 0.2, 'y': 0.1}
         size_hint: 0.2, 0.2
@@ -53,5 +55,44 @@ Manager:
 
 <SelectGenomesScreen>:
     name: 'select_genome'
-    Label:
-        text: "selection"
+    genome_list_obj: root.manager.genome_list
+    selections_obj: root.selected_genomes
+    ListView:
+        pos_hint: {'y': 0.475}
+        size_hint: 1, 0.3
+        id: genome_list_obj
+        adapter: ListAdapter(data=[item["genome.organism_name"] for item in root.manager.candidate_genomes], cls=ListItemButton)
+    ListView:
+        id: selections_obj
+        pos_hint: {'y':0.125}
+        size_hint: 1, 0.3
+        adapter: ListAdapter(data=[], cls=ListItemButton)
+    Button:
+        text: "UPDATE"
+        pos_hint: {'y': 0.8, 'x':0.1}
+        size_hint: 0.2, 0.2
+        on_press:
+            root.manager.update(genome_list_obj, root.manager.candidate_genomes)
+    Button:
+        text: "ADD"
+        pos_hint: {'y': 0.8, 'x':0.4}
+        size_hint: 0.2, 0.2
+        on_press:
+            root.manager.add(genome_list_obj, selections_obj)
+    Button:
+        text: "REMOVE"
+        pos_hint: {'y': 0.8, 'x':0.7}
+        size_hint: 0.2, 0.2
+        on_press:
+            root.manager.remove(selections_obj)
+    Button:
+        text: "BACK TO PATRIC"
+        pos_hint: {'y':0, 'x':0.1}
+        size_hint: 0.2, 0.1
+        on_press:
+            root.manager.current = 'patric'
+    Button:
+        text: "CONTINUE"
+        pos_hint: {'y': 0, 'x': 0.7}
+        size_hint: 0.2, 0.1
+

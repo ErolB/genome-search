@@ -14,7 +14,32 @@ from modules import search_tools
 
 class Manager(ScreenManager):
     candidate_genomes = []  # list of genomes to select from
-    genome_list = []  # list of genomes for analysis
+    genome_list = ObjectProperty(None)
+
+    # ensures that genome_list_obj contains the latest genome list
+    def update(self, genome_list_obj, genomes):
+        genome_list_obj.adapter.data = [item["genome.organism_name"] for item in genomes]
+        genome_list_obj._trigger_reset_populate()
+
+    # adds the selected item from one list to another
+    def add(self, genome_list_obj, selection_list_obj):
+        if not genome_list_obj.adapter.selection:  # stop if nothing is selected
+            return
+        selection = genome_list_obj.adapter.selection[0].text
+        if selection in selection_list_obj.adapter.data:  # stop if item is already in the list
+            return
+        selection_list_obj.adapter.data.append(selection)
+        genome_list_obj._trigger_reset_populate()  # update UI
+        selection_list_obj._trigger_reset_populate()
+
+    # removes an entry from a list
+    def remove(self, genome_list_obj):
+        if not genome_list_obj.adapter.selection:  # stop if nothing is selected
+            return
+        selection = genome_list_obj.adapter.selection[0].text
+        genome_list_obj.adapter.data.remove(selection)
+        genome_list_obj._trigger_reset_populate()
+
 
 class FileButton(Button):
     pass
@@ -24,7 +49,6 @@ class PatricButton(Button):
 
 class StartScreen(Screen):
     pass
-
 
 class ListItem(GridLayout):
     def __init__(self, name, id, **kwargs):
@@ -52,7 +76,7 @@ class PatricScreen(Screen):
         return search_tools.search_by_name(name.text)
 
 class SelectGenomesScreen(Screen):
-    pass
+    selected_genomes = ObjectProperty()
 
 layout = Builder.load_file('kv/layout.kv')
 
