@@ -12,33 +12,36 @@ from kivy.adapters.listadapter import ListAdapter
 from modules import file_tools
 from modules import search_tools
 
+import shutil
+
 class Manager(ScreenManager):
     candidate_genomes = []  # list of genomes to select from
-    genome_list = ObjectProperty(None)
+    genome_list = ObjectProperty(None)  # list of genome objects for analysis
+    hmm_list = []
 
     # ensures that genome_list_obj contains the latest genome list
-    def update(self, genome_list_obj, genomes):
-        genome_list_obj.adapter.data = [item["genome.organism_name"] for item in genomes]
-        genome_list_obj._trigger_reset_populate()
+    def update(self, data_list_obj, data):
+        data_list_obj.adapter.data = data
+        data_list_obj._trigger_reset_populate()
 
     # adds the selected item from one list to another
-    def add(self, genome_list_obj, selection_list_obj):
-        if not genome_list_obj.adapter.selection:  # stop if nothing is selected
+    def add(self, data_list_obj, selection_list_obj):
+        if not data_list_obj.adapter.selection:  # stop if nothing is selected
             return
-        selection = genome_list_obj.adapter.selection[0].text
+        selection = data_list_obj.adapter.selection[0].text
         if selection in selection_list_obj.adapter.data:  # stop if item is already in the list
             return
         selection_list_obj.adapter.data.append(selection)
-        genome_list_obj._trigger_reset_populate()  # update UI
+        data_list_obj._trigger_reset_populate()  # update UI
         selection_list_obj._trigger_reset_populate()
 
     # removes an entry from a list
-    def remove(self, genome_list_obj):
-        if not genome_list_obj.adapter.selection:  # stop if nothing is selected
+    def remove(self, data_list_obj):
+        if not data_list_obj.adapter.selection:  # stop if nothing is selected
             return
-        selection = genome_list_obj.adapter.selection[0].text
-        genome_list_obj.adapter.data.remove(selection)
-        genome_list_obj._trigger_reset_populate()
+        selection = data_list_obj.adapter.selection[0].text
+        data_list_obj.adapter.data.remove(selection)
+        data_list_obj._trigger_reset_populate()
 
 
 class FileButton(Button):
@@ -61,9 +64,6 @@ class ListItem(GridLayout):
 class GenomeList(GridLayout):
     genomes = ObjectProperty()
 
-class GenomeListItem(ListItemButton):
-    pass
-
 class FileScreen(Screen):
     file_name = ObjectProperty(None)
     selection = ObjectProperty(None)
@@ -72,11 +72,34 @@ class FileScreen(Screen):
 
 class PatricScreen(Screen):
     species = ObjectProperty(None)
+
     def name_search(self, name):
         return search_tools.search_by_name(name.text)
 
 class SelectGenomesScreen(Screen):
     selected_genomes = ObjectProperty()
+
+    def get_genes(self, genomes):  # fills in genes from PATRIC genomes
+        return search_tools.retrieve_sequences(genomes)
+
+class StartSearchScreen(Screen):
+    pass
+
+class SelectHMMScreen(Screen):
+    pass
+
+class SelectHMMScreen2(Screen):
+    select_hmm = ObjectProperty()
+
+    def hmm_search(self, hmm_list, genome_list):
+        # copy HMM files to temp
+        for hmm_file in hmm_list:
+            shutil.copy(hmm_file, './temp_files')
+        # prepare for search
+        file_tools.convert_old_hmms('./temp', '3.1b2')
+        file_tools.compress_hmms('./temp')
+        # perform search
+
 
 layout = Builder.load_file('kv/layout.kv')
 

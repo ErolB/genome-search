@@ -1,6 +1,7 @@
 '''
 Created on : 1/27/2018
 Author: Erol Bahadiroglu
+Deprecated: functionality moved to retrieval.py
 '''
 
 from modules.utils import Genome
@@ -37,19 +38,22 @@ def read_genomes(file_path):
         else:
             genomes[organism] = Genome(organism)
             genomes[organism].add_gene(locus, sequence, description=description)
-    return genomes
+    return list(genomes.values())
 
 # writes sequences to a FASTA file_path
 def write_fasta(file_name, genes):
-    with open('temp_files/'+file_name, 'w') as fasta_file:
-        for name, seq in genes.items():
-            fasta_file.write('>'+name+'\n')
-            fasta_file.write(seq+'\n')
+    fasta_file = open('temp_files/'+file_name, 'w')
+    for name, seq in genes.items():
+        fasta_file.write('>'+name+'\n')
+        fasta_file.write(seq+'\n')
+    fasta_file.close()
 
 # reads the JSON file associated with a set of HMMs
 def get_hmms(file_path):
-    with open(file_path, 'r') as guide:
-        return json.loads(guide.read())
+    hmm_dict = {}
+    for file_name in os.listdir(file_path):
+        hmm_name = file_name.replace('.hmm', '')
+        hmm_dict[hmm_name] = file_path + '/' + file_name
 
 # compresses a single HMM file
 def compress_hmm(hmm_name, file_path):
@@ -57,10 +61,10 @@ def compress_hmm(hmm_name, file_path):
     subprocess.call('hmmpress temp_files/%s' % hmm_name)
 
 # compresses a set of HMMs
-def compress_hmms(hmm_names, hmm_path):
+def compress_hmms(hmm_path):
     all_hmm = []
     for file_name in os.listdir(hmm_path):
-        if file_name in hmm_names.values():
+        if '.hmm' in file_name:
             with open(hmm_path+'/'+file_name, 'r') as hmm_file:
                 all_hmm.append(hmm_file.read())
     with open('temp_files/all', 'w') as all_hmm_file:  # creates a temporary file containing every hmm

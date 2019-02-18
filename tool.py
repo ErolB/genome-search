@@ -11,7 +11,7 @@ from modules import search_tools
 
 import subprocess
 
-hmm_path = '/home/erol/hmm_files/PreQ0_HMM'
+hmm_path = '/home/erol/Dropbox/PreQ0_HMM'
 genome_file = '/home/erol/hmm_files/DataBases_Simonetta/Archaea300.rw.faa'
 pssm_path = '/home/erol/Projects/hmm_tool/cdd'
 
@@ -47,6 +47,7 @@ if __name__ == '__main__':
     if data_source == '1':
         print('Reading genomes...')
         genomes = file_tools.read_genomes(genome_file)
+        genomes = {item.organism: item for item in genomes}
         selected_genomes = menu(genomes)
         selected_genomes = list(selected_genomes.values())
     elif data_source == '2':

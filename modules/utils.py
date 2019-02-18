@@ -1,24 +1,28 @@
-import re
 from matplotlib import pyplot as plt
+from jinja2 import Template
 
 class Gene(object):
-    def __init__(self, name, sequence, description=None):
+    def __init__(self, name, sequence, description=None, patric_id=None):
         self.name = name
         self.sequence = sequence
         if description:
             self.description = description
+        if patric_id:
+            self.patric_id = patric_id
+        else:
+            self.patric_id = 'not available'
 
     def get_sequence(self):
         return self.sequence
 
-
 class Genome(object):
-    def __init__(self, organism):
+    def __init__(self, organism, id=None):
         self.organism = organism.replace(' ', '_')
+        self.id = id
         self.genes = {}
 
-    def add_gene(self, name, sequence, description=None):
-        self.genes[name] = Gene(name, sequence, description=description)
+    def add_gene(self, name, sequence, description=None, patric_id=None):
+        self.genes[name] = Gene(name, sequence, description=description, patric_id=patric_id)
 
     def get_sequence(self, name):
         return self.genes[name].get_sequence()
@@ -36,6 +40,7 @@ class Genome(object):
              gene_dict[name] = seq
          return gene_dict
 
+'''
 def show_table(table):
     image = []
     genome_list = list(table.keys())
@@ -49,47 +54,11 @@ def show_table(table):
     plt.xticks(range(len(hmm_list)), hmm_list, rotation=45)
     plt.yticks(range(len(genome_list)), genome_list)
     plt.show()
+'''
 
-# converts a pattern in PROSITE format to standard regualar expression format
-def pattern_converter(prosite_pattern):
-    segments = prosite_pattern.split('-')
-    output_pattern = ''
-    for item in segments:
-        # handle a set of possible values
-        possible_chars = re.findall('\[\w+\]', item)
-        excluded_chars = re.findall('\{\w+\}', item)
-        if possible_chars:
-            possible_chars = re.sub('(\[|\])', '', possible_chars[0])
-            aa_list = [aa for aa in possible_chars]
-            output_pattern += ('(' + '|'.join(aa_list) + ')')
-        # handle a set of excluded values
-        elif excluded_chars:
-            excluded_chars = re.sub('(\{|\})', '', excluded_chars[0])
-            aa_list = [aa for aa in excluded_chars]
-            output_pattern += '[^(' + '|'.join(aa_list) + ')]'
-        # handle single values
-        else:
-            aa = re.findall('(?=\(?)\w', item)[0]
-            if aa == 'x':  # check for wildcarda
-                output_pattern += "\w"
-            else:
-                output_pattern += aa
-        # handle multiplier
-        multiplier = re.findall('\(\d\-?\d?\)', item)
-        if multiplier:
-            multiplier = re.sub('(\(|\))', '', multiplier[0])
-            output_pattern += '{' + multiplier + '}'
-    return output_pattern
-
-def motif_scan_genome(genome_obj, patterns):
-    feature_dict = {}
-    for motif in patterns:
-        for gene in genome_obj.genes.values():
-            seq = gene.get_sequence()
-            if re.findall(patterns[motif], seq):
-                feature_dict[motif] = 1
-                break
-            else:
-                feature_dict[motif] = 0
-    print(feature_dict)
-    return feature_dict
+def generate_page(results, headings=[]):
+    template_html = open('template.html', 'r').read()
+    t = Template(template_html)
+    final_html = t.render(results=results, headings=headings)
+    with open('result.html', 'w') as final:
+        final.write(final_html)

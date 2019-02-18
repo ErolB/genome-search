@@ -7,6 +7,9 @@ Manager:
     FileScreen:
     SelectGenomesScreen:
     PatricScreen:
+    StartSearchScreen:
+    SelectHMMScreen:
+    SelectHMMScreen2:
 
 <StartScreen>:
     name: 'start'
@@ -28,7 +31,7 @@ Manager:
     FileChooserIconView:
         id: filechooser
         size_hint: 0.8,0.8
-        pos_hint: {'x':0, 'y':0.2}
+        pos_hint: {'x':0.1, 'y':0.2}
         on_submit:
             root.manager.candidate_genomes = root.load(filechooser.selection[0])
             root.manager.current = 'select_genome'
@@ -61,7 +64,7 @@ Manager:
         pos_hint: {'y': 0.475}
         size_hint: 1, 0.3
         id: genome_list_obj
-        adapter: ListAdapter(data=[item["genome.organism_name"] for item in root.manager.candidate_genomes], cls=ListItemButton)
+        adapter: ListAdapter(data=[item.organism for item in root.manager.candidate_genomes], cls=ListItemButton)
     ListView:
         id: selections_obj
         pos_hint: {'y':0.125}
@@ -72,7 +75,7 @@ Manager:
         pos_hint: {'y': 0.8, 'x':0.1}
         size_hint: 0.2, 0.2
         on_press:
-            root.manager.update(genome_list_obj, root.manager.candidate_genomes)
+            root.manager.update(genome_list_obj, [item.organism for item in root.manager.candidate_genomes])
     Button:
         text: "ADD"
         pos_hint: {'y': 0.8, 'x':0.4}
@@ -86,13 +89,81 @@ Manager:
         on_press:
             root.manager.remove(selections_obj)
     Button:
-        text: "BACK TO PATRIC"
+        text: "PATRIC SEARCH"
         pos_hint: {'y':0, 'x':0.1}
         size_hint: 0.2, 0.1
         on_press:
             root.manager.current = 'patric'
     Button:
+        text: "FILE SEARCH"
+        pos_hint: {'y':0, 'x':0.4}
+        size_hint: 0.2, 0.1
+        on_press:
+            root.manager.current = 'file'
+    Button:
         text: "CONTINUE"
         pos_hint: {'y': 0, 'x': 0.7}
         size_hint: 0.2, 0.1
+        on_press:
+            root.manager.genome_list = root.get_genes([item for item in root.manager.candidate_genomes if (item.organism in selections_obj.adapter.data)])
+            root.manager.current = 'start_search'
 
+<StartSearchScreen>:
+    name: 'start_search'
+    Label:
+        text: "Select search method."
+        pos_hint: {'y': 0.8, 'x': 0.25}
+        size_hint: 0.5, 0.1
+    Button:
+        text: 'HMM'
+        pos_hint: {'y': 0.4, 'x': 0.1}
+        size_hint: 0.2, 0.2
+        on_press: root.manager.current = 'hmm_screen'
+    Button:
+        text: 'motif'
+        pos_hint: {'y': 0.4, 'x': 0.4}
+        size_hint: 0.2, 0.2
+    Button:
+        text: 'PSI-BLAST'
+        pos_hint: {'y': 0.4, 'x': 0.7}
+        size_hint: 0.2, 0.2
+
+<SelectHMMScreen>:
+    name: 'hmm_screen'
+    Label:
+        text: 'Select a HMM file'
+        size_hint: 0.8, 0.1
+        pos_hint: {'x':0.1, 'y':0.9}
+    FileChooserIconView:
+        id: filechooser
+        size_hint: 0.8,0.8
+        pos_hint: {'x':0.1, 'y':0}
+        on_submit:
+            root.manager.hmm_list.append(filechooser.selection[0])
+            root.manager.current = 'hmm_screen_2'
+
+<SelectHMMScreen2>:
+    name: 'hmm_screen_2'
+    select_hmm_obj: root.select_hmm
+    ListView:
+        id: select_hmm_obj
+        pos_hint: {'y': 0.475}
+        size_hint: 1, 0.3
+        adapter: ListAdapter(data=root.manager.hmm_list, cls=ListItemButton)
+    Button:
+        text: "UPDATE"
+        pos_hint: {'x': 0.1, 'y': 0.8}
+        size_hint: 0.2, 0.1
+        on_press: root.manager.update(select_hmm_obj, root.manager.hmm_list)
+    Button:
+        text: "REMOVE"
+        pos_hint: {'x': 0.4, 'y': 0.8}
+        size_hint: 0.2, 0.1
+        on_press:
+            root.manager.remove(select_hmm_obj)
+            root.manager.hmm_list = select_hmm_obj.adapter.data
+    Button:
+        text: "RETURN TO HMM SELECTION"
+        pos_hint: {'x': 0.1, 'y': 0.2}
+        size_hint: 0.3, 0.1
+        on_press: root.manager.current = 'hmm_screen'
