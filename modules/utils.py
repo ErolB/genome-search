@@ -1,4 +1,3 @@
-from matplotlib import pyplot as plt
 from jinja2 import Template
 
 class Gene(object):

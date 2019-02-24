@@ -23,6 +23,7 @@ class MotifSearch(object):
         input_motifs = open(motif_file, 'r').readlines()
         self.motif_dict = {motif: pattern_converter(motif) for motif in input_motifs}
         self.name = motif_file.split('/')[-1]
+        self.threshold = None
 
     def run(self, genome):
         features = motif_scan_genome(genome, self.motif_dict.values())
