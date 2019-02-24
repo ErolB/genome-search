@@ -1,0 +1,23 @@
+This tool provides a common interface for multiple search methods and genome data sources.
+
+To run the software, run stack.py with Python3.
+Navigate to the directory containing stack.py, then type: python3 stack.py
+
+Dependencies:
+    command line tools:
+        HMMER CLI
+        BLAST+
+        PATRIC CLI
+    Python modules:
+        PyQt5
+        Jinja
+
+To install these, run the following commands from the terminal (you may encounter permission issues and have to run as root):
+
+apt-get install ncbi-blast+
+apt-get install patric-cli
+pip3 install sip
+pip3 install pyqt5
+pip3 install jinja2
+
+HMMER can be installed from its web site (hmmer.org)
